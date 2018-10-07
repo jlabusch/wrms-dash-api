@@ -3,6 +3,7 @@
 DOCKER=docker
 IMAGE=jlabusch/wrms-dash-api
 NAME=wrms-dash-api
+CONFIG_VOL=wrms-dash-config-vol
 NETWORK=wrms-dash-net
 
 build:
@@ -20,7 +21,7 @@ start:
         --env ICINGA_BASIC_AUTH \
         --network $(NETWORK) \
         --volume /etc/localtime:/etc/localtime:ro \
-        --volume $$PWD/config/default.json:/opt/config/default.json:ro \
+        --volume $(CONFIG_VOL):/opt/config:ro \
         --rm \
         $(IMAGE)
 	$(DOCKER) logs -f $(NAME) &
