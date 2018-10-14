@@ -1,16 +1,26 @@
-.PHONY: build network start stop clean
+.PHONY: deps build network start stop clean
 
 DOCKER=docker
 IMAGE=jlabusch/wrms-dash-api
 NAME=wrms-dash-api
 CONFIG_VOL=wrms-dash-config-vol
 NETWORK=wrms-dash-net
+BUILD=$(shell ls ./wrms-dash-build-funcs/build.sh 2>/dev/null || ls ../wrms-dash-build-funcs/build.sh 2>/dev/null)
+SHELL:=/bin/bash
 
-build:
-	$(DOCKER) build -t $(IMAGE) .
+deps:
+	@test -n "$(BUILD)" || (echo 'wrms-dash-build-funcs not found; do you need "git submodule update --init"?'; false)
+	@echo "Using $(BUILD)"
+	@$(BUILD) volume exists $(CONFIG_VOL) || $(BUILD) error "Can't find docker volume $(CONFIG_VOL) - do you need to \"make config\" in wrms-dash?"
+
+build: deps
+	@mkdir -p ./config
+	$(BUILD) cp alpine $(CONFIG_VOL) $$PWD/config /vol0/default.json /vol1/
+	$(BUILD) build $(IMAGE)
+	@rm -fr ./config
 
 network:
-	$(DOCKER) network list | grep -q $(NETWORK) || $(DOCKER) network create $(NETWORK)
+	$(BUILD) network create $(NETWORK)
 
 start: network
 	$(DOCKER) run \
@@ -21,7 +31,6 @@ start: network
         --env ICINGA_BASIC_AUTH \
         --network $(NETWORK) \
         --volume /etc/localtime:/etc/localtime:ro \
-        --volume $(CONFIG_VOL):/opt/config:ro \
         --rm \
         $(IMAGE)
 	$(DOCKER) logs -f $(NAME) &
@@ -30,5 +39,5 @@ stop:
 	$(DOCKER) stop $(NAME)
 
 clean:
-	$(DOCKER) rmi $(IMAGE) $$($(DOCKER) images --filter dangling=true -q)
+	$(BUILD) image delete $(IMAGE) || :
 
