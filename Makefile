@@ -1,4 +1,4 @@
-.PHONY: deps build network start stop clean
+.PHONY: deps build network test start stop clean
 
 DOCKER=docker
 IMAGE=jlabusch/wrms-dash-api
@@ -32,8 +32,16 @@ start: network
         --network $(NETWORK) \
         --volume /etc/localtime:/etc/localtime:ro \
         --rm \
-        $(IMAGE)
+        $(IMAGE) start
 	$(DOCKER) logs -f $(NAME) &
+
+test:
+	$(DOCKER) run \
+        -it \
+        --env DEBUG \
+        --volume /etc/localtime:/etc/localtime:ro \
+        --rm \
+        $(IMAGE) test
 
 stop:
 	$(DOCKER) stop $(NAME)

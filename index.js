@@ -1,10 +1,9 @@
 var config  = require('config'),
-    db      = require('wrms-dash-db').db.create(),
-    util    = require('wrms-dash-util'),
-    query   = require('wrms-dash-db').query,
-    restify = require('restify');
+    util    = require('wrms-dash-util');
 
 'use strict';
+
+require('wrms-dash-db').db.get();
 
 var server = util.server.create('wrms-dash-api', [config.get('api.server.version')]);
 
@@ -69,19 +68,6 @@ util.server.setup('get', '/availability', require('./lib/get_availability'));
 util.server.setup('get', '/fte_budgets', require('./lib/get_fte_budgets'));
 
 util.server.setup('get', '/raw_timesheets', require('./lib/get_raw_timesheets'));
-
-util.server.setup(
-    'get',
-    '/response_times_PLACEHOLDER',
-    query.prepare('response_times', 'rtt',
-        function(ctx){
-            return 'select 1';
-        },
-        function(data, ctx, next){
-            next({result: []});
-        }
-    )
-);
 
 util.server.setup('get', '/response_times', require('./lib/get_response_times'));
 
