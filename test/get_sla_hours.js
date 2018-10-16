@@ -1,72 +1,47 @@
 var assert = require('assert'),
-    should = require('should');
-
-function fake_response(handler){
-    this.data_sent = 0;
-    this.data = null;
-}
-
-fake_response.prototype.json = function(j){
-    this.data_sent++;
-    this.data = j;
-}
-
-fake_response.prototype.charSet = function(){}
-
-var test_org = {
-    "org_id": 123,
-    "org_name": "Acme Co",
-    "name": "Acme Co",
-    "type": "monthly",
-    "hours": 80,
-    "cash_value": 0,
-    "cash_rate": 0,
-    "cash_currency": "GBP",
-    "start_date": "1 October 2008",
-    "end_date": "31 October 2008",
-    "systems": [ 456 ]
-};
-
-function make_ctx(){
-    return {
-        org: test_org.org_id,
-        org_name: test_org.org_name,
-        sys: test_org.systems,
-        period: '2017-9'
-    };
-}
-
-var get_sla_hours = require('../lib/get_sla_hours'),
+    common = require('./lib/common'),
+    should = require('should'),
+    get_sla_hours = require('../lib/get_sla_hours'),
     util = require('wrms-dash-util'),
     store = require('../lib/data_store_query');
 
-util.org_data.active().add_org(test_org);
+let orgs = {
+    acme: common.create_dummy_org({org_id: 1, org_name: "Acme Co", name: "Acme Co", systems: [ 1 ]}),
+    basco: common.create_dummy_org({org_id: 2, org_name: "Bas Co", name: "Bas Co", systems: [ 2 ]})
+}
 
-var basic_response = [
+var query_response = [
     {
-        "id": test_org.org_name + " month 2017-8",
-        "base_hours": test_org.hours,
+        "id": orgs.basco.name + " annual 2017-1 to 2018-1",
+        "base_hours": 20,
+        "base_hours_spent": 15,
+        "sla_quote_hours": 11,
+        "additional_hours": 47.75
+    },
+    {
+        "id": orgs.acme.org_name + " month 2017-8",
+        "base_hours": orgs.acme.hours,
         "base_hours_spent": 80.5,
         "sla_quote_hours": 66,
         "additional_hours": 0
     },
     {
-        "id": test_org.org_name + " month 2017-9",
-        "base_hours": test_org.hours,
+        "id": orgs.acme.org_name + " month 2017-9",
+        "base_hours": orgs.acme.hours,
         "base_hours_spent": 80.5,
         "sla_quote_hours": 72.5,
         "additional_hours": 0
     },
     {
-        "id": test_org.org_name + " month 2017-10",
-        "base_hours": test_org.hours,
+        "id": orgs.acme.org_name + " month 2017-10",
+        "base_hours": orgs.acme.hours,
         "base_hours_spent": 7,
         "sla_quote_hours": 0,
         "additional_hours": 0
     },
     {
-        "id": test_org.org_name + " month 2017-11",
-        "base_hours": test_org.hours,
+        "id": orgs.acme.org_name + " month 2017-11",
+        "base_hours": orgs.acme.hours,
         "base_hours_spent": 14,
         "sla_quote_hours": 0,
         "additional_hours": 0
@@ -75,9 +50,9 @@ var basic_response = [
 
 describe('get_sla_hours', function(){
     describe('query', function(){
-        it('should handle basic query', function(done){
-            let res = new fake_response(),
-                ctx = make_ctx();
+        it('should handle monthly budgets', function(done){
+            let res = new common.fake_response(),
+                ctx = common.make_ctx(orgs.acme);
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
@@ -90,7 +65,30 @@ describe('get_sla_hours', function(){
                 done();
             }
 
-            store.load_test_response(null, JSON.parse(JSON.stringify(basic_response)));
+            store.load_test_response(null, common.cp(query_response.filter(x => {
+                return x.id.startsWith(orgs.acme.name);
+            })));
+
+            get_sla_hours({}, res, next, ctx);
+        });
+        it('should handle biannual budgets', function(done){
+            let res = new common.fake_response(),
+                ctx = common.make_ctx(orgs.basco);
+
+            function next(){
+                (res.data_sent === 1).should.equal(true);
+                (!res.data.error).should.equal(true);
+                res.data.budget.should.equal(20);
+                Array.isArray(res.data.result).should.equal(true);
+                res.data.result[0][1].should.equal(11);
+                res.data.result[1][1].should.equal(4);
+                res.data.result[2][1].should.equal(47.75);
+                done();
+            }
+
+            store.load_test_response(null, common.cp(query_response.filter(x => {
+                return x.id.startsWith(orgs.basco.name);
+            })));
 
             get_sla_hours({}, res, next, ctx);
         });

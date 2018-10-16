@@ -36,10 +36,14 @@ start: network
 	$(DOCKER) logs -f $(NAME) &
 
 test:
+	@mkdir -p ./coverage
 	$(DOCKER) run \
         -it \
         --env DEBUG \
         --volume /etc/localtime:/etc/localtime:ro \
+        --volume $$PWD/coverage:/opt/coverage \
+        --volume $$PWD/lib:/opt/lib \
+        --volume $$PWD/test:/opt/test \
         --rm \
         $(IMAGE) test
 
@@ -47,5 +51,6 @@ stop:
 	$(DOCKER) stop $(NAME)
 
 clean:
+	@rm -fr ./coverage
 	$(BUILD) image delete $(IMAGE) || :
 

@@ -129,6 +129,7 @@ util.server.main(
     config.get('api.server.listen_port'),
     () => {
         util.org_data.active().set_static_contracts(config.get('contracts'));
+        // TODO: util.org_data.active().data => GET wrms-dash-sync/org_data
     }
 );
 

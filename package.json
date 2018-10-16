@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node ./index.js",
     "pretest": "./node_modules/.bin/eslint index.js lib/*js",
-    "test": "./node_modules/.bin/mocha"
+    "test": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec"
   },
   "author": "Jacques Labuschagne <jlabusch@acm.org>",
   "license": "GPL-3.0",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "mocha": "~5",
     "should": "~13",
-    "istanbul": "0.4.5",
+    "istanbul": "~0.4",
     "eslint": "~5",
     "eslint-plugin-promise": "~4",
     "eslint-plugin-node": "~7"
