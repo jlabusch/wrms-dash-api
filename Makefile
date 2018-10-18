@@ -48,7 +48,7 @@ test:
         $(IMAGE) test
 
 stop:
-	$(DOCKER) stop $(NAME)
+	$(DOCKER) stop $(NAME) || :
 
 clean:
 	@rm -fr ./coverage
