@@ -1,4 +1,5 @@
 var config  = require('config'),
+    request = require('request'),
     util    = require('wrms-dash-util');
 
 'use strict';
@@ -18,6 +19,32 @@ server.post('/update_org_data', (req, res, next) => {
     res.json({error: null});
     next && next(false);
 });
+
+function request_org_data_update(){
+    util.org_data.active().set_static_contracts(config.get('contracts'));
+
+    let uri = config.get('api-cache.host') + '/org_data';
+
+    request(
+        uri,
+        function(err, res, body){
+            if (err){
+                util.log(__filename, `ERROR: ${uri} "${err}"`);
+            }else if (res.statusCode == 200){
+                try{
+                    let json = JSON.parse(body);
+                    if (json.result){
+                        util.org_data.active().data = json.result;
+                    }
+                }catch(ex){
+                    util.log(__filename, `ERROR: ${uri} "${ex}"`);
+                }
+            }else{
+                util.log(__filename, `ERROR: ${uri} returned ${res.statusCode}`);
+            }
+        }
+    );
+}
 
 server.post('/enc', function(req, res, next){
     res.send(util.crypt.encrypt(req.body));
@@ -127,9 +154,6 @@ util.server.setup(
 
 util.server.main(
     config.get('api.server.listen_port'),
-    () => {
-        util.org_data.active().set_static_contracts(config.get('contracts'));
-        // TODO: util.org_data.active().data => GET wrms-dash-sync/org_data
-    }
+    request_org_data_update
 );
 
