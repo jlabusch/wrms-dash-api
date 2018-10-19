@@ -3,7 +3,6 @@
 DOCKER=docker
 IMAGE=jlabusch/wrms-dash-api
 NAME=wrms-dash-api
-CONFIG_VOL=wrms-dash-config-vol
 NETWORK=wrms-dash-net
 BUILD=$(shell ls ./wrms-dash-build-funcs/build.sh 2>/dev/null || ls ../wrms-dash-build-funcs/build.sh 2>/dev/null)
 SHELL:=/bin/bash
@@ -11,13 +10,9 @@ SHELL:=/bin/bash
 deps:
 	@test -n "$(BUILD)" || (echo 'wrms-dash-build-funcs not found; do you need "git submodule update --init"?'; false)
 	@echo "Using $(BUILD)"
-	@$(BUILD) volume exists $(CONFIG_VOL) || $(BUILD) error "Can't find docker volume $(CONFIG_VOL) - do you need to \"make config\" in wrms-dash?"
 
 build: deps
-	@mkdir -p ./config
-	$(BUILD) cp alpine $(CONFIG_VOL) $$PWD/config /vol0/default.json /vol1/
 	$(BUILD) build $(IMAGE)
-	@rm -fr ./config
 
 network:
 	$(BUILD) network create $(NETWORK)
@@ -28,6 +23,7 @@ start: network
         --detach  \
         --expose 80 \
         --env DEBUG \
+        --env CONFIG \
         --env ICINGA_BASIC_AUTH \
         --network $(NETWORK) \
         --volume /etc/localtime:/etc/localtime:ro \
@@ -40,6 +36,7 @@ test:
 	$(DOCKER) run \
         -it \
         --env DEBUG \
+        --env CONFIG \
         --volume /etc/localtime:/etc/localtime:ro \
         --volume $$PWD/coverage:/opt/coverage \
         --volume $$PWD/lib:/opt/lib \
@@ -51,6 +48,7 @@ stop:
 	$(DOCKER) stop $(NAME) || :
 
 clean:
+	@test -d ./coverage && $(DOCKER) run -it --rm -v $$PWD/coverage:/coverage alpine chown -R $$(id -u):$$(id -g) /coverage || :
 	@rm -fr ./coverage
 	$(BUILD) image delete $(IMAGE) || :
 

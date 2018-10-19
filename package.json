@@ -11,6 +11,7 @@
     "node": ">=8.0.0"
   },
   "scripts": {
+    "prestart": "./get_config_from_env.sh",
     "start": "node ./index.js",
     "pretest": "./node_modules/.bin/eslint index.js lib/*js",
     "test": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec"
