@@ -27,6 +27,7 @@
     "wrms-dash-db": "https://github.com/jlabusch/wrms-dash-db.git#8da5f6eadc4462645a38"
   },
   "devDependencies": {
+    "wrms-dash-test-lib": "https://github.com/jlabusch/wrms-dash-test-lib.git#c68528541091e2bf68",
     "mocha": "~5",
     "should": "~13",
     "istanbul": "~0.4",

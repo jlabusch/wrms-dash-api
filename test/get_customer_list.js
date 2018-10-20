@@ -1,13 +1,13 @@
 var assert = require('assert'),
-    common = require('./lib/common'),
+    testlib= require('wrms-dash-test-lib'),
     should = require('should'),
     get_customer_list = require('../lib/get_customer_list'),
     util = require('wrms-dash-util'),
     store = require('../lib/data_store_query');
 
 let orgs = {
-    acme: common.create_dummy_org({org_id: 1, org_name: "Acme Co", name: "Acme Co - SLA 2018-2019", systems: [ 1 ]}),
-    basco: common.create_dummy_org({org_id: 2, org_name: "Bas Co", name: "Bas Co - SLA 2017-2020", systems: [ 2, 3 ]})
+    acme: testlib.get_test_org({org_id: 1}),
+    basco: testlib.get_test_org({org_id: 2})
 }
 
 var query_response = [
@@ -46,8 +46,8 @@ model_list[orgs.basco.name] = {
 describe('get_customer_list', function(){
     describe('query', function(){
         it('should return all clients when user is __vendor', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx(),
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx(),
                 sql = '';
 
             function next(){
@@ -60,13 +60,13 @@ describe('get_customer_list', function(){
                 done();
             }
 
-            store.load_test_response(null, common.cp(query_response));
+            store.load_test_response(null, testlib.cp(query_response));
 
             get_customer_list({}, res, next, ctx, s => {sql = s});
         });
         it('should limit results for client users', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx(orgs.acme),
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx(orgs.acme),
                 sql = '';
 
             function next(){
@@ -78,13 +78,13 @@ describe('get_customer_list', function(){
                 done();
             }
 
-            store.load_test_response(null, common.cp(query_response.filter(o => { return o.id === orgs.acme.name})));
+            store.load_test_response(null, testlib.cp(query_response.filter(o => { return o.id === orgs.acme.name})));
 
             get_customer_list({}, res, next, ctx, s => {sql = s});
         });
         it('should handle errors', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx();
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx();
 
             function next(){
                 (res.data_sent === 1).should.equal(true);

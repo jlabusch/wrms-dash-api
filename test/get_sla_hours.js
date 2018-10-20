@@ -1,13 +1,13 @@
 var assert = require('assert'),
-    common = require('./lib/common'),
+    testlib= require('wrms-dash-test-lib'),
     should = require('should'),
     get_sla_hours = require('../lib/get_sla_hours'),
     util = require('wrms-dash-util'),
     store = require('../lib/data_store_query');
 
 let orgs = {
-    acme: common.create_dummy_org({org_id: 1, org_name: "Acme Co", name: "Acme Co", systems: [ 1 ]}),
-    basco: common.create_dummy_org({org_id: 2, org_name: "Bas Co", name: "Bas Co", systems: [ 2, 3 ]})
+    acme: testlib.get_test_org({org_id: 1}),
+    basco: testlib.get_test_org({org_id: 2})
 }
 
 var query_response = [
@@ -19,28 +19,28 @@ var query_response = [
         "additional_hours": 47.75
     },
     {
-        "id": orgs.acme.org_name + " month 2017-8",
+        "id": orgs.acme.name + " month 2017-8",
         "base_hours": orgs.acme.hours,
         "base_hours_spent": 80.5,
         "sla_quote_hours": 66,
         "additional_hours": 0
     },
     {
-        "id": orgs.acme.org_name + " month 2017-9",
+        "id": orgs.acme.name + " month 2017-9",
         "base_hours": orgs.acme.hours,
         "base_hours_spent": 80.5,
         "sla_quote_hours": 72.5,
         "additional_hours": 0
     },
     {
-        "id": orgs.acme.org_name + " month 2017-10",
+        "id": orgs.acme.name + " month 2017-10",
         "base_hours": orgs.acme.hours,
         "base_hours_spent": 7,
         "sla_quote_hours": 0,
         "additional_hours": 0
     },
     {
-        "id": orgs.acme.org_name + " month 2017-11",
+        "id": orgs.acme.name + " month 2017-11",
         "base_hours": orgs.acme.hours,
         "base_hours_spent": 14,
         "sla_quote_hours": 0,
@@ -51,8 +51,8 @@ var query_response = [
 describe('get_sla_hours', function(){
     describe('query', function(){
         it('should handle monthly budgets', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx(orgs.acme);
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx(orgs.acme);
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
@@ -65,15 +65,15 @@ describe('get_sla_hours', function(){
                 done();
             }
 
-            store.load_test_response(null, common.cp(query_response.filter(x => {
+            store.load_test_response(null, testlib.cp(query_response.filter(x => {
                 return x.id.startsWith(orgs.acme.name);
             })));
 
             get_sla_hours({}, res, next, ctx);
         });
         it('should handle biannual budgets', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx(orgs.basco);
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx(orgs.basco);
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
@@ -86,15 +86,15 @@ describe('get_sla_hours', function(){
                 done();
             }
 
-            store.load_test_response(null, common.cp(query_response.filter(x => {
+            store.load_test_response(null, testlib.cp(query_response.filter(x => {
                 return x.id.startsWith(orgs.basco.name);
             })));
 
             get_sla_hours({}, res, next, ctx);
         });
         it('should handle errors', function(done){
-            let res = new common.fake_response(),
-                ctx = common.make_ctx();
+            let res = new testlib.fake_response(),
+                ctx = testlib.make_ctx();
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
