@@ -47,11 +47,13 @@ describe('get_customer_list', function(){
     describe('query', function(){
         it('should return all clients when user is __vendor', function(done){
             let res = new common.fake_response(),
-                ctx = common.make_ctx();
+                ctx = common.make_ctx(),
+                sql = '';
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
                 (!res.data.error).should.equal(true);
+                Array.isArray(sql.match(/WHERE c.org_id=/)).should.equal(false);
                 (Object.keys(res.data).length).should.equal(2);
                 should.exist(res.data[orgs.acme.name]);
                 (res.data[orgs.basco.name].systems[1] === 3).should.equal(true);
@@ -60,15 +62,17 @@ describe('get_customer_list', function(){
 
             store.load_test_response(null, common.cp(query_response));
 
-            get_customer_list({}, res, next, ctx);
+            get_customer_list({}, res, next, ctx, s => {sql = s});
         });
         it('should limit results for client users', function(done){
             let res = new common.fake_response(),
-                ctx = common.make_ctx(orgs.acme);
+                ctx = common.make_ctx(orgs.acme),
+                sql = '';
 
             function next(){
                 (res.data_sent === 1).should.equal(true);
                 (!res.data.error).should.equal(true);
+                Array.isArray(sql.match(/WHERE c.org_id=/)).should.equal(true);
                 (Object.keys(res.data).length).should.equal(1);
                 should.exist(res.data[orgs.acme.name]);
                 done();
@@ -76,7 +80,7 @@ describe('get_customer_list', function(){
 
             store.load_test_response(null, common.cp(query_response.filter(o => { return o.id === orgs.acme.name})));
 
-            get_customer_list({}, res, next, ctx);
+            get_customer_list({}, res, next, ctx, s => {sql = s});
         });
         it('should handle errors', function(done){
             let res = new common.fake_response(),
