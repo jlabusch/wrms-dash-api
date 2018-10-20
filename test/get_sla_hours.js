@@ -7,7 +7,7 @@ var assert = require('assert'),
 
 let orgs = {
     acme: common.create_dummy_org({org_id: 1, org_name: "Acme Co", name: "Acme Co", systems: [ 1 ]}),
-    basco: common.create_dummy_org({org_id: 2, org_name: "Bas Co", name: "Bas Co", systems: [ 2 ]})
+    basco: common.create_dummy_org({org_id: 2, org_name: "Bas Co", name: "Bas Co", systems: [ 2, 3 ]})
 }
 
 var query_response = [
@@ -89,6 +89,20 @@ describe('get_sla_hours', function(){
             store.load_test_response(null, common.cp(query_response.filter(x => {
                 return x.id.startsWith(orgs.basco.name);
             })));
+
+            get_sla_hours({}, res, next, ctx);
+        });
+        it('should handle errors', function(done){
+            let res = new common.fake_response(),
+                ctx = common.make_ctx();
+
+            function next(){
+                (res.data_sent === 1).should.equal(true);
+                should.exist(res.data.error);
+                done();
+            }
+
+            store.load_test_response(new Error("test error"));
 
             get_sla_hours({}, res, next, ctx);
         });

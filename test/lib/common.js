@@ -28,6 +28,15 @@ var util = require('wrms-dash-util');
 
 util.org_data.active().add_org(test_org);
 
+var vendor_org = undefined;
+
+require('config').get('contracts').forEach(c => {
+    if (c.org_name === '__vendor'){
+        vendor_org = c;
+    }
+    util.org_data.active().add_org(c);
+});
+
 function clone_pod(a){ return JSON.parse(JSON.stringify(a)) }
 
 module.exports = {
@@ -45,7 +54,7 @@ module.exports = {
         return o;
     },
     make_ctx: function(org){
-        org = org || test_org;
+        org = org || vendor_org;
         return {
             org: org.org_id,
             org_name: org.org_name,
