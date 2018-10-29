@@ -14,7 +14,7 @@
     "prestart": "./get_config_from_env.sh",
     "start": "node ./index.js",
     "pretest": "./get_config_from_env.sh",
-    "test": "./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/_mocha",
+    "test": "./node_modules/nyc/bin/nyc.js --reporter lcov --reporter text ./node_modules/mocha/bin/_mocha",
     "posttest": "./node_modules/.bin/eslint index.js lib/*js"
   },
   "author": "Jacques Labuschagne <jlabusch@acm.org>",
