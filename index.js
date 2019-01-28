@@ -70,6 +70,8 @@ util.server.setup('get', '/sla_unquoted', require('./lib/get_sla_unquoted'));
 
 util.server.setup('get', '/new_sysadmin_wrs', require('./lib/get_new_sysadmin_wrs'));
 
+util.server.setup('get', '/earned_revenue', require('./lib/get_earned_revenue'));
+
 util.server.setup('get', '/wrs_to_invoice', require('./lib/get_wrs_to_invoice'));
 
 util.server.setup('get', '/additional_wrs_unquoted', require('./lib/get_additional_wrs_unquoted'));
