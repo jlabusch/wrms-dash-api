@@ -1,5 +1,4 @@
 var config  = require('config'),
-    request = require('request'),
     util    = require('wrms-dash-util');
 
 'use strict';
@@ -25,16 +24,15 @@ function request_org_data_update(){
 
     let uri = config.get('api-cache.host') + '/org_data';
 
-    request(
+    util.request(
         uri,
         function(err, res, body){
             if (err){
                 util.log(__filename, `ERROR: ${uri} "${err}"`);
             }else if (res.statusCode == 200){
                 try{
-                    let json = JSON.parse(body);
-                    if (json.result){
-                        util.org_data.active().data = json.result;
+                    if (body.result){
+                        util.org_data.active().data = body.result;
                     }
                 }catch(ex){
                     util.log(__filename, `ERROR: ${uri} "${ex}"`);
