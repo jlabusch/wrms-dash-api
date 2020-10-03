@@ -70,7 +70,9 @@ util.server.setup('get', '/new_sysadmin_wrs', require('./lib/get_new_sysadmin_wr
 
 util.server.setup('get', '/earned_revenue', require('./lib/get_earned_revenue'));
 
-util.server.setup('get', '/team_planner', require('./lib/get_team_planner_data'));
+util.server.setup('get', '/earned_hours_by_team', require('./lib/get_earned_hours_by_team'));
+
+util.server.setup('get', '/team_planner', require('./lib/get_team_planner_data').handler);
 
 util.server.setup('get', '/wrs_to_invoice', require('./lib/get_wrs_to_invoice'));
 
