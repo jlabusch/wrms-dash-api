@@ -4,3 +4,4 @@ coverage
 invoices.json
 mis.json
 download_mis_report.sh
+.envrc

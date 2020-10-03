@@ -18,12 +18,14 @@ network:
 	$(BUILD) network create $(NETWORK)
 
 start: network
+	@if [ -z "$$GOOGLE_API_KEY" ]; then echo "WARNING: please export GOOGLE_API_KEY and restart."; fi
 	$(DOCKER) run \
         --name $(NAME) \
         --detach  \
         --expose 80 \
         --env DEBUG \
         --env CONFIG \
+        --env GOOGLE_API_KEY \
         --env ICINGA_BASIC_AUTH \
         --network $(NETWORK) \
         --volume /etc/localtime:/etc/localtime:ro \
@@ -37,6 +39,7 @@ test:
         -it \
         --env DEBUG \
         --env CONFIG \
+        --env GOOGLE_API_KEY \
         --volume /etc/localtime:/etc/localtime:ro \
         --volume $$PWD/coverage:/opt/coverage \
         --volume $$PWD/lib:/opt/lib \
