@@ -23,7 +23,7 @@
     "config": "~3.3",
     "got": "~11.7",
     "restify": "~8.5",
-    "wrms-dash-util": "https://github.com/jlabusch/wrms-dash-util.git#963d431aa2b03d",
+    "wrms-dash-util": "https://github.com/jlabusch/wrms-dash-util.git#a52174af2eb15f5d",
     "wrms-dash-db": "https://github.com/jlabusch/wrms-dash-db.git#ca1a6211cb76e6755"
   },
   "devDependencies": {
